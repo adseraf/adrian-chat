@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Adrian Serafin — Fractional CMO</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg-primary:#0a0a1a;--bg-secondary:#111128;--bg-chat:#161633;--bg-input:#1e1e3f;--text-primary:#e8e8f0;--text-secondary:#9898b8;--accent-orange:#ff6b35;--accent-purple:#7d2ae8;--accent-gradient:linear-gradient(135deg,#ff6b35,#e84393,#7d2ae8);--border-color:#2a2a4a;--msg-user-bg:#1a1a40;--msg-bot-bg:#0f0f2a}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#welcome-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;width:100%;max-width:520px;padding:2rem;animation:fadeIn .6s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.avatar-welcome{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid transparent;background-image:var(--accent-gradient);background-origin:border-box;background-clip:padding-box,border-box;margin-bottom:1.5rem;box-shadow:0 0 40px rgba(125,42,232,.3)}
+.welcome-title{font-size:1.6rem;font-weight:700;margin-bottom:.5rem;text-align:center}
+.welcome-subtitle{font-size:.95rem;color:var(--text-secondary);text-align:center;margin-bottom:2rem;line-height:1.5}
+.welcome-form{width:100%;display:flex;flex-direction:column;gap:1rem}
+.form-group label{display:block;font-size:.85rem;color:var(--text-secondary);margin-bottom:.4rem;font-weight:500}
+.form-group input{width:100%;padding:.85rem 1rem;background:var(--bg-input);border:1px solid var(--border-color);border-radius:12px;color:var(--text-primary);font-size:.95rem;outline:none;transition:border-color .2s}
+.form-group input:focus{border-color:var(--accent-purple)}
+.form-group input::placeholder{color:#555578}
+.optional-tag{font-size:.75rem;color:#666688;font-weight:400}
+.btn-start{margin-top:.5rem;padding:.9rem 2rem;background:var(--accent-gradient);border:none;border-radius:12px;color:#fff;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s}
+.btn-start:hover{opacity:.9}.btn-start:active{transform:scale(.98)}.btn-start:disabled{opacity:.5;cursor:not-allowed}
+#chat-screen{display:none;flex-direction:column;width:100%;max-width:680px;height:100vh;max-height:100dvh}
+.chat-header{display:flex;align-items:center;gap:.8rem;padding:1rem 1.2rem;background:var(--bg-secondary);border-bottom:1px solid var(--border-color);flex-shrink:0}
+.avatar-small{width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--accent-purple)}
+.header-info h2{font-size:1rem;font-weight:600}.header-info span{font-size:.75rem;color:var(--text-secondary)}
+.online-dot{display:inline-block;width:8px;height:8px;background:#22c55e;border-radius:50%;margin-right:4px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.messages-area{flex:1;overflow-y:auto;padding:1.2rem;display:flex;flex-direction:column;gap:1rem;scroll-behavior:smooth}
+.messages-area::-webkit-scrollbar{width:6px}.messages-area::-webkit-scrollbar-track{background:transparent}.messages-area::-webkit-scrollbar-thumb{background:var(--border-color);border-radius:3px}
+.message{display:flex;gap:.6rem;max-width:85%;animation:msgIn .3s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.message.bot{align-self:flex-start}.message.user{align-self:flex-end;flex-direction:row-reverse}
+.message .avatar-msg{width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;margin-top:2px}
+.message.user .avatar-msg{display:none}
+.message .bubble{padding:.75rem 1rem;border-radius:16px;line-height:1.55;font-size:.92rem}
+.message.bot .bubble{background:var(--msg-bot-bg);border:1px solid var(--border-color);border-bottom-left-radius:4px}
+.message.user .bubble{background:var(--accent-gradient);color:#fff;border-bottom-right-radius:4px}
+.typing-indicator{display:flex;gap:.6rem;align-self:flex-start;max-width:85%}
+.typing-dots{display:flex;gap:4px;padding:.75rem 1rem;background:var(--msg-bot-bg);border:1px solid var(--border-color);border-radius:16px;border-bottom-left-radius:4px;align-items:center}
+.typing-dots span{width:7px;height:7px;background:var(--text-secondary);border-radius:50%;animation:typing 1.4s infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-4px);opacity:1}}
+.input-area{padding:.8rem 1.2rem;background:var(--bg-secondary);border-top:1px solid var(--border-color);display:flex;gap:.6rem;flex-shrink:0}
+.input-area textarea{flex:1;padding:.75rem 1rem;background:var(--bg-input);border:1px solid var(--border-color);border-radius:12px;color:var(--text-primary);font-size:.92rem;font-family:inherit;resize:none;outline:none;max-height:120px;min-height:44px;line-height:1.4;transition:border-color .2s}
+.input-area textarea:focus{border-color:var(--accent-purple)}.input-area textarea::placeholder{color:#555578}
+.btn-send{width:44px;height:44px;background:var(--accent-gradient);border:none;border-radius:12px;color:#fff;font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:opacity .2s;align-self:flex-end}
+.btn-send:hover{opacity:.85}.btn-send:disabled{opacity:.4;cursor:not-allowed}
+.loading-overlay{display:none;position:fixed;inset:0;background:var(--bg-primary);z-index:100;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem}
+.loading-overlay.active{display:flex}
+.loading-spinner{width:48px;height:48px;border:3px solid var(--border-color);border-top-color:var(--accent-purple);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--text-secondary);font-size:.9rem;text-align:center}
+@media(max-width:480px){#welcome-screen{padding:1.5rem}.messages-area{padding:.8rem}.message{max-width:92%}}
+.bubble p{margin:0 0 .5rem 0}.bubble p:last-child{margin-bottom:0}.bubble strong{font-weight:600}
+.bubble ul,.bubble ol{padding-left:1.2rem;margin:.3rem 0}.bubble li{margin:.15rem 0}
+.bubble a{color:#a78bfa;text-decoration:underline}.bubble a:hover{color:#c4b5fd}
+</style>
+</head>
+<body>
+<div id="welcome-screen">
+<img class="avatar-welcome" id="avatar-welcome" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ff6b35'/%3E%3Cstop offset='100%25' stop-color='%237d2ae8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='60' cy='60' r='60' fill='url(%23g)'/%3E%3Ctext x='60' y='68' text-anchor='middle' fill='white' font-size='42' font-family='sans-serif' font-weight='700'%3EAS%3C/text%3E%3C/svg%3E" alt="Adrian Serafin"/>
+<h1 class="welcome-title">Adrian Serafin</h1>
+<p class="welcome-subtitle">Fractional CMO | 17+ lat doświadczenia w marketingu B2B/B2C<br>Porozmawiajmy o tym, jak mogę pomóc Twojej firmie.</p>
+<form class="welcome-form" id="welcome-form">
+<div class="form-group"><label for="user-name">Twoje imię</label><input type="text" id="user-name" placeholder="np. Anna" required autocomplete="given-name"/></div>
+<div class="form-group"><label for="company-url">Strona internetowa firmy <span class="optional-tag">(opcjonalnie)</span></label><input type="text" id="company-url" placeholder="np. twojafirma.pl" autocomplete="url"/></div>
+<button type="submit" class="btn-start" id="btn-start">Rozpocznij rozmowę</button>
+</form>
+</div>
+<div class="loading-overlay" id="loading-overlay"><div class="loading-spinner"></div><div class="loading-text" id="loading-text">Analizuję stronę Twojej firmy...</div></div>
+<div id="chat-screen">
+<div class="chat-header">
+<img class="avatar-small" id="avatar-header" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23ff6b35'/%3E%3Cstop offset='100%25' stop-color='%237d2ae8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='21' cy='21' r='21' fill='url(%23g)'/%3E%3Ctext x='21' y='26' text-anchor='middle' fill='white' font-size='16' font-family='sans-serif' font-weight='700'%3EAS%3C/text%3E%3C/svg%3E" alt="Adrian Serafin"/>
+<div class="header-info"><h2>Adrian Serafin</h2><span><span class="online-dot"></span>Fractional CMO — online</span></div>
+</div>
+<div class="messages-area" id="messages-area"></div>
+<div class="input-area">
+<textarea id="user-input" rows="1" placeholder="Napisz wiadomość..." disabled></textarea>
+<button class="btn-send" id="btn-send" disabled title="Wyślij"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+</div>
+</div>
+<script>
+const API_BASE=window.location.origin;
+let conversationHistory=[],userName="",companyUrl="",companyContent="",isStreaming=false;
+const welcomeScreen=document.getElementById("welcome-screen"),chatScreen=document.getElementById("chat-screen"),loadingOverlay=document.getElementById("loading-overlay"),loadingText=document.getElementById("loading-text"),messagesArea=document.getElementById("messages-area"),userInput=document.getElementById("user-input"),btnSend=document.getElementById("btn-send"),welcomeForm=document.getElementById("welcome-form");
+
+welcomeForm.addEventListener("submit",async(e)=>{
+e.preventDefault();userName=document.getElementById("user-name").value.trim();companyUrl=document.getElementById("company-url").value.trim();
+if(!userName)return;welcomeScreen.style.display="none";
+if(companyUrl){loadingOverlay.classList.add("active");loadingText.textContent="Analizuj\u0119 stron\u0119 Twojej firmy...";
+try{const r=await fetch(API_BASE+"/api/fetch-site",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url:companyUrl})});const d=await r.json();companyContent=d.content||"";}catch(err){companyContent="";}
+loadingOverlay.classList.remove("active");}
+chatScreen.style.display="flex";await sendInitialMessage();});
+
+async function sendInitialMessage(){showTypingIndicator();
+try{const r=await fetch(API_BASE+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:[],userName,companyUrl,companyContent})});
+removeTypingIndicator();const t=await readStream(r);conversationHistory.push({role:"assistant",content:t});
+userInput.disabled=false;btnSend.disabled=false;userInput.focus();}
+catch(err){removeTypingIndicator();addMessage("bot","Przepraszam, wyst\u0105pi\u0142 problem. Od\u015Bwie\u017C stron\u0119.");}}
+
+async function sendMessage(){const text=userInput.value.trim();if(!text||isStreaming)return;
+addMessage("user",text);conversationHistory.push({role:"user",content:text});userInput.value="";autoResize();
+isStreaming=true;btnSend.disabled=true;userInput.disabled=true;showTypingIndicator();
+try{const r=await fetch(API_BASE+"/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:conversationHistory,userName})});
+removeTypingIndicator();const t=await readStream(r);conversationHistory.push({role:"assistant",content:t});}
+catch(err){removeTypingIndicator();addMessage("bot","Przepraszam, co\u015B posz\u0142o nie tak.");}
+isStreaming=false;btnSend.disabled=false;userInput.disabled=false;userInput.focus();}
+
+async function readStream(response){const reader=response.body.getReader();const decoder=new TextDecoder();let fullText="",currentBubble=null;
+while(true){const{done,value}=await reader.read();if(done)break;
+const chunk=decoder.decode(value,{stream:true});const lines=chunk.split("\n");
+for(const line of lines){if(line.startsWith("data: ")){const data=line.slice(6);if(data==="[DONE]")break;
+try{const p=JSON.parse(data);if(p.text){fullText+=p.text;if(!currentBubble){currentBubble=addMessage("bot","",true);}
+currentBubble.innerHTML=formatMarkdown(fullText);scrollToBottom();}}catch(e){}}}}return fullText;}
+
+function addMessage(type,text,returnBubble=false){const msg=document.createElement("div");msg.className="message "+type;
+const avatarSrc=document.getElementById("avatar-header").src;
+msg.innerHTML=type==="bot"?'<img class="avatar-msg" src="'+avatarSrc+'" alt="AS"/><div class="bubble">'+formatMarkdown(text)+'</div>':'<div class="bubble">'+escapeHtml(text)+'</div>';
+messagesArea.appendChild(msg);scrollToBottom();if(returnBubble)return msg.querySelector(".bubble");}
+
+function showTypingIndicator(){const i=document.createElement("div");i.className="typing-indicator";i.id="typing-indicator";
+const a=document.getElementById("avatar-header").src;
+i.innerHTML='<img class="avatar-msg" src="'+a+'" alt="AS"/><div class="typing-dots"><span></span><span></span><span></span></div>';
+messagesArea.appendChild(i);scrollToBottom();}
+
+function removeTypingIndicator(){const el=document.getElementById("typing-indicator");if(el)el.remove();}
+function scrollToBottom(){messagesArea.scrollTop=messagesArea.scrollHeight;}
+function escapeHtml(s){const d=document.createElement("div");d.textContent=s;return d.innerHTML;}
+
+function formatMarkdown(text){return text.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/\*(.*?)\*/g,"<em>$1</em>")
+.replace(/\n\n/g,"</p><p>").replace(/\n- (.*?)(?=\n|$)/g,"<li>$1</li>")
+.replace(/(<li>.*<\/li>)/gs,"<ul>$1</ul>").replace(/\n/g,"<br>")
+.replace(/^/,"<p>").replace(/$/,"</p>").replace(/<p><\/p>/g,"")
+.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');}
+
+function autoResize(){userInput.style.height="auto";userInput.style.height=Math.min(userInput.scrollHeight,120)+"px";}
+userInput.addEventListener("input",autoResize);
+userInput.addEventListener("keydown",(e)=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}});
+btnSend.addEventListener("click",sendMessage);
+</script>
+</body>
+</html>
